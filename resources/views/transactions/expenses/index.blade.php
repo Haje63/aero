@@ -32,7 +32,7 @@
                 </thead>
                 <tbody>
                     @foreach($expenses as $expense)
-                    <tr>
+                    <tr id="expense-{{ $expense->id }}">
                         <td>{{ $expense->description }}</td>
                         <td>Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
                         <td>{{ date('d-m-Y', strtotime($expense->date)) }}</td>
@@ -129,7 +129,7 @@ $(document).ready(function() {
     });
 
     $('.delete-btn').on('click', function() {
-        var id = $(this).data('id');
+        const id = $(this).data('id');
         Swal.fire({
             title: 'Apakah Anda yakin?',
             text: "Pengeluaran ini akan dihapus!",
@@ -142,28 +142,21 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '/expenses/' + id,
+                    url: `/expenses/${id}`,
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
                         if (response.success) {
-                            Swal.fire(
-                                'Terhapus!',
-                                'Pengeluaran berhasil dihapus.',
-                                'success'
-                            ).then(() => {
-                                window.location.reload();
+                            Swal.fire('Terhapus!', 'Pengeluaran berhasil dihapus.', 'success')
+                            .then(() => {
+                                $(`#expense-${id}`).remove(); // Menghapus baris tabel tanpa reload
                             });
                         }
                     },
                     error: function(xhr) {
-                        Swal.fire(
-                            'Error!',
-                            'Terjadi kesalahan saat menghapus data.',
-                            'error'
-                        );
+                        Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data.', 'error');
                     }
                 });
             }
@@ -171,3 +164,4 @@ $(document).ready(function() {
     });
 });
 </script>
+@endsection
